@@ -1,10 +1,10 @@
 # SDK Quick Start
 
-The Paraflux SDK provides full access to the protocol -- trading, LP operations, volatility data, and Greeks across 10 power perp markets.
+The Paraflux SDK provides programmatic access to trading, LP operations, volatility data, and options Greeks across all power perp markets.
 
-## Install
+## Installation
 
-**TypeScript** (recommended)
+**TypeScript**
 ```bash
 npm install @paraflux/sdk
 ```
@@ -14,142 +14,134 @@ npm install @paraflux/sdk
 pip install paraflux
 ```
 
-## Read-Only (No Wallet Needed)
+> **Note**: The SDK is available on [GitHub](https://github.com/cmyocyte/paraflux-sdk). Check the repo for the latest version.
 
-### Connect
+## Read-Only (No Wallet Required)
 
 ```typescript
-import { ParaFluxClient } from '@paraflux/sdk';
+import { ParafluxClient } from "@paraflux/sdk";
 
-const client = new ParaFluxClient({
-  chainId: 999,
-  rpcUrl: 'https://rpc.hyperliquid.xyz/evm',
+const client = new ParafluxClient({
+  chain: 998, // testnet (999 for mainnet when live)
+  rpc: "https://rpc.hyperevm-testnet.xyz",
 });
-```
 
-### Market Data
+// Get market data
+const market = await client.getMarket("HYPE");
+console.log(market.spot, market.fundingRate, market.openInterest);
 
-```typescript
-const market = await client.getMarketData('HYPE');
-console.log(`HYPE spot: $${(Number(market.hypeSpot) / 1e18).toFixed(2)}`);
-console.log(`Funding rate: ${(Number(market.fundingRate) / 1e18 * 100).toFixed(4)}%`);
-```
+// Get volatility surface
+const vol = await client.getVolSurface("HYPE");
+console.log(vol.vol1d, vol.vol7d, vol.vol30d);
 
-### Realized Volatility (10 Markets)
-
-```typescript
-const surfaces = await client.getAllVolSurfaces();
-for (const [asset, s] of surfaces) {
-  console.log(`${asset}: vol=${(s.realizedVol1d * 100).toFixed(1)}%`);
-}
-```
-
-### Greeks
-
-```typescript
-import { math } from '@paraflux/sdk';
-
-const greeks = math.computeAllGreeks(
-  math.numberToWad(1),   // 1 unit size
-  math.numberToWad(35),  // $35 HYPE spot
-  0.8,                   // 80% vol
-  true,                  // long
-);
-
-console.log(`Delta: ${greeks.delta.toFixed(3)}`);      // 0.700
-console.log(`Gamma: ${greeks.gamma.toFixed(4)}`);      // 0.0200 (constant!)
-console.log(`Theta: $${greeks.theta.toFixed(2)}/day`); // -$17.52/day
+// Get all vol surfaces at once
+const allVol = await client.getAllVolSurfaces();
 ```
 
 ## Trading (Wallet Required)
 
-### Connect with Wallet
-
 ```typescript
-const client = new ParaFluxClient({
-  chainId: 999,
-  rpcUrl: 'https://rpc.hyperliquid.xyz/evm',
-  privateKey: '0x...',
+import { ParafluxClient } from "@paraflux/sdk";
+
+const client = new ParafluxClient({
+  chain: 998,
+  rpc: "https://rpc.hyperevm-testnet.xyz",
+  privateKey: process.env.PRIVATE_KEY,
 });
-```
 
-### Open Position
-
-```typescript
-// Long HYPE^2: $1,000 collateral at 2x leverage
+// Open a 2x long on HYPE
 const tx = await client.openPosition({
-  asset: 'HYPE',
-  isLong: true,
-  usdAmount: 1000,
+  asset: "HYPE",
+  side: "long",
+  sizeUsd: 1000,
   leverage: 2,
-  slippageBps: 100,  // 1% slippage tolerance
 });
-console.log(`Opened: ${tx.hash}`);
-```
 
-### Check Position
+// Check your position
+const pos = await client.getPosition("HYPE", "long");
+console.log(pos.size, pos.health, pos.unrealizedPnl);
 
-```typescript
-const pos = await client.getPosition(client.getAccount(), 'HYPE', true);
-if (pos) {
-  console.log(`Size: ${math.wadToNumber(pos.position.size)}`);
-  console.log(`Health: ${pos.health.toFixed(2)}`);
-  console.log(`P&L: $${math.wadToNumber(pos.unrealizedPnL).toFixed(2)}`);
-}
-```
-
-### Close Position
-
-```typescript
-await client.closePosition('HYPE', true);  // close HYPE long
+// Close position
+await client.closePosition("HYPE", "long");
 ```
 
 ## LP Vault
 
 ```typescript
-// Deposit $10,000 USDC
-await client.deposit(10000);
+// Deposit 1000 USDC
+await client.deposit(1000);
 
-// Check vault state
-const vault = await client.getVaultState();
-console.log(`Share price: $${vault.sharePrice.toFixed(4)}`);
-console.log(`Utilization: ${(vault.utilization * 100).toFixed(1)}%`);
+// Check share price and utilization
+const vault = await client.getVaultStats();
+console.log(vault.sharePrice, vault.utilization, vault.tvl);
 
 // Withdraw (after 1-hour cooldown)
-await client.withdraw(5000);
+await client.withdraw(shares);
 ```
 
-## Vol Arb Toolkit
+## Volatility Data
 
 ```typescript
-// Breakeven vol for short position with 10bps hedge cost
-const breakeven = math.computeBreakevenVol(0.8, 10);
-console.log(`Breakeven: ${(breakeven * 100).toFixed(1)}%`); // 52.4%
+// Single asset
+const vol = await client.getVolSurface("BTC");
+console.log(vol.realizedVol1d); // e.g. 0.35 (35%)
+console.log(vol.forwardVariance); // 7d forward variance
 
-// Kelly sizing for VRP trade
-const kelly = math.computeKellyFraction(0.05, 0.1);
-console.log(`Optimal size: ${kelly.toFixed(2)}x`); // 2.50x
+// All assets
+const surfaces = await client.getAllVolSurfaces();
+for (const [asset, vol] of Object.entries(surfaces)) {
+  console.log(`${asset}: ${(vol.vol30d * 100).toFixed(1)}%`);
+}
+
+// Historical
+const history = await client.getVolHistory("ETH", { days: 30 });
 ```
 
-## Python
+## Options Greeks
 
-```python
-from paraflux import ParaFluxClient
+```typescript
+import { computeGreeks } from "@paraflux/sdk";
 
-client = ParaFluxClient(chain_id=999, rpc_url='https://rpc.hyperliquid.xyz/evm')
+const greeks = computeGreeks({
+  spot: 45.0,
+  strike: 50.0,
+  vol: 0.80,
+  timeHorizon: 7, // days
+  power: 2,
+});
 
-# Realized volatility
-surface = client.get_vol_surface('HYPE')
-print(f"HYPE realized vol: {surface.realized_vol_1d * 100:.1f}%")
-
-# Greeks
-from paraflux.math import compute_all_greeks
-greeks = compute_all_greeks(size, spot, 0.8, True)
+console.log(greeks.delta, greeks.gamma, greeks.theta);
 ```
 
-## Next Steps
+## Advanced: Vol Arb Toolkit
 
-- [TypeScript SDK Reference](typescript.md)
-- [Python SDK Reference](python.md)
-- [Volatility Data Guide](volatility.md)
-- [Example Bots](examples.md)
+```typescript
+import { volArb } from "@paraflux/sdk";
+
+// Compute breakeven vol for a position
+const breakeven = volArb.breakevenVol({
+  fundingRate: 0.0018, // 0.18%/day
+  leverage: 2,
+});
+
+// Kelly-optimal sizing
+const kelly = volArb.kellySize({
+  realizedVol: 0.80,
+  impliedVol: 0.65,
+  bankroll: 10000,
+});
+```
+
+## Chain Configuration
+
+| Network | Chain ID | RPC |
+|---------|----------|-----|
+| Testnet | 998 | `https://rpc.hyperevm-testnet.xyz` |
+| Mainnet | 999 | `https://rpc.hyperevm.xyz` |
+
+## Further Reading
+
+- [Volatility Data Guide](./volatility.md)
+- [Fee Structure](./fees.md)
+- [Markets](./markets.md)
+- [GitHub: paraflux-sdk](https://github.com/cmyocyte/paraflux-sdk)

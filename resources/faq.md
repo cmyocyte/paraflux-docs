@@ -2,81 +2,125 @@
 
 ## General
 
-**What is Paraflux?**
-Paraflux is a power perpetual protocol on HyperEVM. You trade squared exposure (S^2) to 10 markets -- 7 crypto and 3 real-world assets. The LP vault is the counterparty to every trade, hedged automatically.
+### What is Paraflux?
+A power perpetual protocol on HyperEVM. Trade squared exposure (S^2) across crypto, commodities, and equities. The LP vault is the automated, hedged counterparty -- no order book needed.
 
-**What are power perps?**
-Power perpetuals are perpetual futures where the payoff is a power of the spot price. For p=2, your position tracks spot^2 -- giving convex exposure similar to a perpetual ATM straddle, but with no strikes, no expiry, and no fragmentation. One instrument per market.
+### What are power perps?
+Perpetual futures where the payoff is a power of the spot price. With p=2, a 10% spot move produces roughly a 21% index move. You get convex exposure -- like an ATM straddle -- without strikes, expiry, or rolling.
 
-**How is this different from regular perps?**
-Regular perps give linear exposure (1x spot). Power perps give squared exposure -- moves are amplified in both directions. A 10% spot move produces roughly a 20% index move. You also pay funding based on variance (sigma^2) instead of mark vs index spread.
+### How is this different from regular perps?
+Regular perps give you linear exposure. Power perps give you **squared** exposure -- gains accelerate on larger moves. Funding is based on realized variance (sigma^2) rather than mark-index price spreads.
 
-**What markets are available?**
-10 markets at launch: HYPE^2, BTC^2, ETH^2, SOL^2, XRP^2, SUI^2, DOGE^2 (crypto) + GOLD^2, SILVER^2, OIL^2 (commodities/energy via HIP-3).
+### What markets are available?
+**Launch (Phase 1):** BTC, ETH
+**Phase 2:** HYPE, GOLD, SILVER
+**Phase 3:** SOL, XRP, and real-world assets (TSLA, NVDA, OIL)
 
-**Is Paraflux live?**
-Yes. Mainnet on HyperEVM (chain 999). Trade at [app.paraflux.xyz](https://app.paraflux.xyz).
+All markets share a single LP vault.
+
+### Is Paraflux live?
+Currently live on HyperEVM testnet (chain 998) at [app.paraflux.xyz](https://app.paraflux.xyz). Mainnet deployment (chain 999) is imminent.
+
+---
 
 ## Trading
 
-**What's the maximum leverage?**
-3x. This is enforced on-chain. Higher leverage increases liquidation risk.
+### What's the maximum leverage?
+3x. Higher leverage tightens your liquidation price -- at 3x, a long gets liquidated after roughly a 31% adverse move.
 
-**How much does it cost to trade?**
-Base fee is 7 bps (0.07%). Impact fee scales with trade size relative to pool depth. A $20K trade in a $3M pool pays approximately 30 bps effective.
+### How much does it cost to trade?
 
-**Can I get liquidated?**
-Yes, if your position health drops below 1.0 (equity < 15% of notional). A 5% liquidation bonus incentivizes liquidators. The insurance fund absorbs bad debt first.
+| Fee | Rate | Description |
+|-----|------|-------------|
+| Trading fee | 0.30% of notional | Fixed per-trade fee |
+| Impact fee | 0.3 x notional / poolSize | Quadratic fee protecting LPs from large orders |
+| Protocol split | 20% of total fees | Directed to protocol treasury |
+| Insurance split | 5% of LP fees | First-loss buffer (immutable) |
 
-**How does funding work?**
-Longs pay shorts sigma^2 per year, continuously. At 80% vol, that is 64% annually. Funding is deducted from your margin every second. The rate is based on realized variance from the on-chain oracle, plus a skew adjustment based on OI imbalance.
+Effective fee formula: `effectiveFee = tradingFee + impactCoeff x notional / totalAssets`
 
-**What is the funding rate based on?**
-Realized variance (sigma^2) from the on-chain RealizedVolOracle, not implied volatility. This is an honest design choice -- we measure what actually happened, not what a market consensus predicts.
+### Can I get liquidated?
+Yes. Liquidation triggers when your equity drops below 5% of notional (maintenance margin). A 5% liquidator bonus incentivizes keepers. The insurance fund absorbs any bad debt before it reaches LPs.
+
+### How does funding work?
+Longs pay shorts continuously -- per-second, on-chain. The rate is based on realized variance:
+
+`dailyFunding ~ sigma^2 / 365 x notional`
+
+At 80% annualized vol, that's roughly 0.18% of notional per day. Funding accrues automatically -- no manual claims or settlements.
+
+### What is the funding rate based on?
+Realized variance (sigma^2) from the on-chain RealizedVolOracle, adjusted by OI skew. When the vol oracle is set, funding uses live implied variance from ImpliedVolOracle. This is **realized** variance -- what actually happened -- not implied volatility.
+
+---
 
 ## LP Vault
 
-**How does the LP vault work?**
-Deposit USDC, receive ERC-4626 LP shares. The vault is the counterparty to all power perp trades. It earns 75% of trading fees, funding income from leveraged traders, and net trader losses. Delta exposure is hedged via CoreWriter on Hyperliquid's native order book.
+### How does the LP vault work?
+Deposit USDC, receive ERC-4626 shares. The vault is the counterparty to all power perp trades. It earns:
+- **75%** of all trading fees
+- Funding income (when longs pay shorts)
+- Net trader losses
 
-**What are the risks of LPing?**
-The vault is short gamma -- it loses on large spot moves. The CoreWriter hedge removes approximately 80% of directional risk, but residual gamma exposure remains. Fee income is the primary income source that offsets gamma drag.
+Delta risk is automatically hedged via CoreWriter on Hyperliquid's native perp order book (80% hedge ratio, 5x leverage, grid orders).
 
-**What's the expected return?**
-Backtest shows 26.6% annual with Sharpe 3.25 on 365 days of real data. Past performance does not guarantee future results.
+### What are the risks of LPing?
+The vault is short gamma -- it loses on large, sudden spot moves. Hedging mitigates ~96% of directional risk but doesn't eliminate it. In backtesting, the vault survived a simulated -60% crash with only -0.9% impact. Across 500 Monte Carlo paths, the vault showed 0% probability of loss.
 
-**Can I withdraw anytime?**
-Yes, after a 1-hour cooldown from your last deposit. This prevents flash loan attacks.
+### What's the expected return?
+Walk-forward backtesting on 365 days of real data: **68% annual return, Sharpe ratio 5.1**. This includes grid hedging costs, keeper latency, withdrawal impact, and Greeks-based risk management.
+
+### Can I withdraw anytime?
+Yes, after a 1-hour cooldown following your last deposit. Withdrawals are processed instantly at the current share price.
+
+### Fee split breakdown
+
+| Recipient | Share | Source |
+|-----------|-------|--------|
+| LPs | 75% | Trading fees + funding |
+| Protocol treasury | 20% | Trading fees |
+| Insurance fund | 5% | LP fee portion (immutable) |
+
+---
 
 ## Volatility Oracle
 
-**Is the vol data really on-chain?**
-Yes. The RealizedVolOracle contract computes realized variance from price observations entirely on-chain. No off-chain computation, no trusted relayers. Any smart contract can read it via a `view` call for free.
+### Is the vol data really on-chain?
+Yes. The RealizedVolOracle computes variance entirely on-chain using HyperEVM precompile price feeds. No Chainlink, no Pyth, no trusted relayers.
 
-**Is this an implied vol oracle?**
-No. It measures realized variance -- what actually happened. It does not produce implied volatility. We are upfront about this distinction. For implied vol data, we plan to integrate Volmex BVIV in a future release.
+### Is this an implied vol oracle?
+No. It measures **realized variance** -- what actually happened. The ImpliedVolOracle (when enabled) derives implied vol from funding utilization, but the core oracle is realized.
 
-**How often is it updated?**
-Every 5 minutes (288 observations per day per asset). A keeper calls `recordObservation()` which is permissionless -- anyone can call it.
+### How often is it updated?
+Every 5 minutes (288 observations per day per asset) via permissionless keeper calls.
 
-**What assets are tracked?**
-All 10 launch markets: HYPE, BTC, ETH, SOL, XRP, SUI, DOGE, GOLD, SILVER, OIL.
+### What assets are tracked?
+All launched markets receive real-time vol coverage.
+
+---
 
 ## Technical
 
-**What chain is this on?**
-HyperEVM -- the EVM layer of Hyperliquid. Mainnet is chain 999, testnet is chain 998. Sub-cent gas, 2-second blocks.
+### What chain is this on?
+HyperEVM -- testnet (chain 998), mainnet (chain 999). Sub-cent gas, ~2-second blocks.
 
-**Are the contracts upgradeable?**
-No. All contracts are immutable. Security through simplicity.
+### Are the contracts upgradeable?
+No. All contracts are **immutable** -- once deployed, they cannot be modified. Security through simplicity and thorough testing.
 
-**Where can I find the code?**
-BSL 1.1 (open source). Contracts in `contracts/src/`, SDKs in `sdk/typescript/` and `sdk/python/`.
+### Is the code open source?
+No. All deployed contracts are independently verifiable on-chain via the HyperEVM block explorer.
 
-**How many tests?**
-700+ tests covering unit, fuzz (80K+ runs), integration, and invariant testing.
+### How is the protocol secured?
+Three internal audit passes covering access control, funding manipulation, liquidation logic, vault-market-maker interactions, and economic invariants. The OracleModule includes a circuit breaker that rejects price updates deviating beyond a configurable threshold from the EMA.
+
+---
 
 ## Roadmap
 
-**What about options, variance swaps, VIX token?**
-These are on the roadmap but not yet available. Power perps are the core product at launch. Options and variance swaps will be introduced when there is sufficient volume and market maker interest. Vol index trading will integrate Volmex BVIV for implied vol data. See the [Roadmap section](../SUMMARY.md) in the docs for details.
+### What about options, variance swaps, VIX token?
+These are on the roadmap:
+- **Phase 2**: Multi-asset expansion (HYPE, gold, silver), Anchor vault (delta-neutral yield)
+- **Phase 3**: Variance swaps, structured vaults (Anchor + Surge), vol index perpetual
+- **Phase 4**: 50+ markets, portfolio margining, LP shares as collateral on HyperLend
+
+Power perps are the foundation -- additional instruments build on top of the same vault and oracle infrastructure.

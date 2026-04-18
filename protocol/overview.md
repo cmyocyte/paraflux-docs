@@ -1,76 +1,54 @@
 # Protocol Overview
 
-> **Status:** Live on HyperEVM mainnet (chain 999). All contracts immutable (no upgrades, no proxies).
+Paraflux is a power perpetual protocol on HyperEVM. Traders get squared exposure (S^2) to crypto, commodities, and equities -- no strikes, no expiry, no options complexity.
 
-Paraflux is a **power perpetual protocol** on HyperEVM. Traders get squared exposure (S^2) to 10 markets. The LP vault is the counterparty to every trade, delta-hedged automatically via CoreWriter.
+## How It Works
+
+Power perps are perpetual futures where the payoff is a power of the spot price. A 10% spot move produces roughly a 21% index move. Returns accelerate -- the bigger the move, the more you make.
+
+Instead of an order book, the **LP vault** is the counterparty to every trade. Traders open and close positions instantly at oracle price plus fees. No slippage from thin order books, no waiting for a match.
 
 ## Architecture
 
 ```
-Trader -> PowerPerpRouter -> PositionEngine (positions, collateral)
-                          -> FundingEngine (funding accrual, vol oracle reads)
-                          -> LPVault (fee income, P&L settlement, collateral lock)
-                          -> HedgeManager -> CoreWriter -> Hyperliquid L1 order book
+Trader --> PowerPerpRouter --> PositionEngine (open/close)
+                           --> FundingEngine  (continuous funding)
+                           --> LPVault        (liquidity + settlement)
+                           --> OracleModule   (EMA-smoothed price)
 ```
 
-## Pool-to-Peer Model
+- **PowerPerpRouter**: Entry point for all trades. Handles fee calculation, collateral transfer, and position creation.
+- **PositionEngine**: Stores positions, enforces margin requirements, tracks P&L.
+- **FundingEngine**: Computes and accrues funding based on realized variance and OI skew. Funding is continuous -- per-second, on-chain.
+- **LPVault**: ERC-4626 vault. Receives USDC deposits, provides liquidity, earns fees. Delta-hedged via CoreWriter on Hyperliquid's native order book.
+- **OracleModule**: Reads spot prices from HyperEVM precompiles (0x0807 for core perps, 0x080e for HIP-3 assets). Applies EMA smoothing with circuit breaker protection.
+- **LiquidationEngine**: Liquidates undercollateralized positions. 5% liquidator bonus. Insurance fund absorbs bad debt.
 
-Power perpetuals trade against the **LP vault**. There is no order book for power perps -- the vault provides instant liquidity at oracle price plus fees. This eliminates the cold-start liquidity problem that plagues order-book-based options protocols.
+## For Traders
 
-| Component | Role |
-|-----------|------|
-| PowerPerpRouter | Entry point for all trades. Handles fees, slippage, USDC conversion. |
-| PositionEngine | Stores positions, tracks collateral, computes health. |
-| FundingEngine | Accrues funding based on realized variance (sigma^2) and OI skew. |
-| LPVault | ERC-4626 vault. Counterparty to all traders. Earns fees, bears gamma. |
-| HedgeManager | Hedges the vault's delta exposure on Hyperliquid's native order book via CoreWriter. |
-| LiquidationEngine | Permissionless liquidation with pessimistic index pricing. |
-| InsuranceFund | First-loss buffer (5% of fees, immutable). |
-| RealizedVolOracle | On-chain realized variance from spot price log returns. |
+- Deposit USDC collateral, open long or short positions
+- Up to 3x leverage
+- No expiry -- hold as long as you want
+- Pay continuous funding (based on realized variance)
+- Close anytime at current oracle price
+- Liquidation at 5% maintenance margin
 
-## How It Works
+## For LPs
 
-### For Traders
+- Deposit USDC into the vault, receive ERC-4626 shares
+- Earn trading fees (75% of all fees), funding income, and net trader losses
+- Delta risk is automatically hedged via CoreWriter on Hyperliquid's native perp order book
+- 1-hour withdrawal cooldown after deposit
+- Backtested performance: 68% annual return, Sharpe ratio 5.1 (365 days of real data, walk-forward validated)
 
-1. **Deposit USDC collateral** via the Router
-2. **Open a position** (long or short, up to 3x leverage) on any of the 10 markets
-3. **Pay/receive funding** every second based on sigma^2 (realized variance)
-4. **Close anytime** -- no expiry, no exercise, no strikes
+## Markets
 
-The payoff of a long p=2 position is proportional to `spot^2`. This gives convex exposure -- like a perpetual ATM straddle, but simpler.
+Paraflux launches with BTC and ETH power perps, with HYPE, gold, and silver following shortly after. The roadmap includes SOL, XRP, and real-world assets (TSLA, NVDA, oil).
 
-### For LPs
+All contracts are immutable and non-upgradeable. The protocol is currently live on HyperEVM testnet (chain 998) with mainnet deployment (chain 999) imminent.
 
-1. **Deposit USDC** into the LP Vault (ERC-4626)
-2. **Earn trading fees** (75% of all power perp fees), funding income, and net trader losses
-3. **Protocol hedges delta** automatically via CoreWriter on Hyperliquid's native order book
-4. **Withdraw anytime** (1-hour cooldown after deposit)
+## Links
 
-### Delta Hedging via CoreWriter
-
-The LP vault's directional risk is hedged on Hyperliquid's native perpetual order book using the CoreWriter precompile (0x3333...3). This is an asynchronous fire-and-forget mechanism -- the HedgeManager sends hedge orders to HyperCore, which executes them on the L1 order book.
-
-- **Crypto markets** (HYPE, BTC, ETH, SOL, XRP, SUI, DOGE): hedged via CoreWriter on core perps
-- **Commodity/energy markets** (GOLD, SILVER, OIL): hedged via REST API on HIP-3 dexes
-
-Hedge ratio: ~80%. Rebalance threshold: ~10% delta drift. Hedge cost: approximately 6% of LP fees.
-
-## Key Properties
-
-- **Immutable contracts** -- no upgrades, no proxy patterns
-- **Permissionless** -- funding accrual and liquidations can be called by anyone
-- **ERC-4626** -- LP vault follows the standard tokenized vault interface
-- **10 markets** -- 7 crypto + 3 real-world assets (gold, silver, crude oil)
-
-## Coming Soon
-
-- **Anchor Vault** -- delta-neutral yield from short power perps + hedge
-- **Surge Vault** -- leveraged long with LP yield buffer
-- **Strategies** -- Protect, Amplify, Straddle, Income -- one-click compositions
-
-## Future Roadmap
-
-- Vol index trading via Volmex BVIV integration
-- Variance swaps
-- Options
-- 50+ markets via MarketFactory
+- **App**: [app.paraflux.xyz](https://app.paraflux.xyz)
+- **Testnet**: Chain 998
+- **Disclosures**: [app.paraflux.xyz/disclosures](https://app.paraflux.xyz/disclosures)

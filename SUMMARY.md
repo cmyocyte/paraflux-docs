@@ -10,16 +10,17 @@
 * [Power Perpetuals](protocol/power-perps.md)
 * [Funding Rate](protocol/funding.md)
 * [Realized Vol Oracle](protocol/vol-oracle.md)
-* [Fee Model](protocol/fees.md)
-* [Liquidation](protocol/liquidation.md)
+* [Fee Structure](protocol/fees.md)
+* [Liquidations](protocol/liquidation.md)
 * [Insurance Fund](protocol/insurance.md)
 * [LP Vault](protocol/lp-vault.md)
 
 ## Products
 
 * [LP Vault (Earn)](products/lp-vault.md)
-* [10 Power Perp Markets](products/multi-asset.md)
-* [Strategies (Coming Soon)](products/protection.md)
+* [Markets](products/multi-asset.md)
+* [Strategies](products/strategies.md)
+* [Options Chain & Compiler](products/options.md)
 * [Anchor Vault (Coming Soon)](products/anchor.md)
 * [Surge Vault (Coming Soon)](products/surge.md)
 
@@ -41,4 +42,3 @@
 
 * [Vol Index Trading](products/vix-token.md)
 * [Variance Swaps](protocol/variance-swaps.md)
-* [Options](protocol/options.md)

@@ -71,9 +71,9 @@ All bots have Python mirrors in `sdk/python/examples/`:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `RPC_URL` | mainnet | HyperEVM JSON-RPC |
+| `RPC_URL` | testnet | HyperEVM JSON-RPC |
 | `PRIVATE_KEY` | -- | Hex-encoded private key |
-| `CHAIN_ID` | 999 | 999=mainnet |
+| `CHAIN_ID` | 998 | 998=testnet, 999=mainnet |
 | `DRY_RUN` | true | Log without executing |
 | `POSITION_USD` | 1000 | Collateral per trade |
 | `LEVERAGE` | 2 | Position leverage |

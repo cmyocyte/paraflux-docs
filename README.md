@@ -4,7 +4,7 @@
 
 Paraflux is a power perpetual protocol on HyperEVM. Trade squared exposure (S^2) to crypto, commodities, and energy -- with no strikes, no expiry, and no fragmentation. The LP vault is the counterparty, delta-hedged via CoreWriter.
 
-> **Status:** Mainnet launch on HyperEVM (chain 999).
+> **Status:** Live on HyperEVM testnet (chain 998). Mainnet (chain 999) imminent.
 >
 > [Launch App](https://app.paraflux.xyz) | [View Contracts](contracts/addresses.md) | [SDK Quick Start](sdk/quickstart.md)
 

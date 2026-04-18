@@ -1,48 +1,91 @@
-# Liquidation
+# Liquidations
 
-Positions are liquidated when their health ratio drops below the maintenance margin requirement.
+Positions that fall below the maintenance margin are liquidated automatically by third-party keepers. The system protects LPs through a layered defense: maintenance margin, liquidation bonus, and insurance fund.
 
-## Health Ratio
+## When Does Liquidation Happen?
+
+A position is liquidated when:
 
 ```
-health = (collateral + unrealizedPnL - fundingOwed) / maintenanceMargin
+equity < maintenanceMargin x notional
 ```
 
-- **Healthy**: health > 1.0
-- **Liquidatable**: health ≤ 1.0
-- **Maintenance margin**: 5% of notional
+Where:
+- **equity** = collateral + unrealized P&L - accrued funding
+- **maintenanceMargin** = 5% of notional
+- **notional** = position size x current index
 
-## Liquidation Process
+### Example
 
-1. Anyone can call `liquidate(trader, isLong)` (permissionless)
-2. LiquidationEngine verifies health < 1.0 using pessimistic index
-3. Position closed at current market price
-4. **Liquidator receives 5% bonus** on remaining collateral
-5. If position is underwater (bad debt):
-   - Insurance fund absorbs first
-   - Remaining shortfall → LP vault (`absorbBadDebt`)
+You open a 2x long on HYPE at $45 with $500 collateral ($1,000 notional):
+- Maintenance margin = 5% x $1,000 = $50
+- You get liquidated when equity drops to $50
+- That's a loss of $450 on $500 collateral (90% loss)
+- At 2x leverage, this happens after roughly a ~22% adverse spot move (accounting for the squared payoff)
 
-## Pessimistic Index
+## Liquidation Price
 
-To prevent stale EMA from blocking liquidations, the LiquidationEngine uses:
+For power perps (p=2), the liquidation price depends on leverage and the squared payoff curve:
 
-- For **longs**: `min(emaIndex, rawIndex)` — uses the worse price
-- For **shorts**: `max(emaIndex, rawIndex)` — uses the worse price
+| Leverage | Approx. Adverse Move to Liq (Long) |
+|----------|-------------------------------------|
+| 1x | ~68% drop |
+| 1.5x | ~50% drop |
+| 2x | ~38% drop |
+| 2.5x | ~31% drop |
+| 3x | ~27% drop |
 
-Multi-step EMA catch-up handles gaps: `computeMultiStepEMA()` uses `rpow((1-α), blockGap, WAD)` for O(log n) convergence.
+These are approximate -- actual liquidation depends on accumulated funding and the squared index dynamics.
 
-## SDK
+### Pessimistic Index
 
-```typescript
-// Check if a position is liquidatable
-const { liquidatable, remainingMargin } = await client.isLiquidatable(trader, true);
+The LiquidationEngine uses a **pessimistic index** for safety:
+- For longs: `min(EMA index, raw index)` -- uses whichever is worse
+- For shorts: `max(EMA index, raw index)` -- uses whichever is worse
 
-// Get liquidation price
-const liqPrice = await client.getLiquidationPrice(trader, true);
-console.log(`Liquidation at HYPE = $${math.wadToNumber(liqPrice).toFixed(2)}`);
+This prevents stale EMA prices from blocking valid liquidations.
 
-// Execute liquidation (earn 5% bonus)
-if (liquidatable) {
-  await client.liquidate(trader, true);
-}
-```
+## What Happens During Liquidation
+
+1. **Keeper calls `liquidate()`** on the LiquidationEngine
+2. **Position is closed** at current pessimistic index
+3. **Remaining equity** is distributed:
+   - Trader receives: equity minus liquidation bonus (if any equity remains)
+   - Liquidator receives: 5% bonus (from trader's remaining equity)
+   - If the position is underwater (negative equity): insurance fund covers the shortfall
+
+## Insurance Fund
+
+The insurance fund is the first-loss buffer before bad debt reaches LPs:
+
+1. **Funded by**: 5% of LP trading fees (immutable, cannot be changed post-deploy)
+2. **Used when**: A liquidated position has negative equity (bad debt)
+3. **Flow**: InsuranceFund pays the vault to cover the shortfall
+4. **Cap**: When the fund reaches its target size, the 5% fee slice redirects back to LPs
+5. **Last resort**: If the insurance fund is empty, bad debt is absorbed by the vault via `absorbBadDebt()`
+
+## Liquidation Keepers
+
+Liquidations are executed by third-party keepers, not by Paraflux. Anyone can run a liquidation keeper:
+
+- Keepers monitor position health across all markets
+- Profitable liquidations earn the 5% bonus
+- The LiquidationExecutor contract simplifies the keeper interface
+- Keepers share infrastructure with the funding and vol oracle keepers
+
+## Avoiding Liquidation
+
+- **Use lower leverage**: 1x-1.5x gives you significantly more room
+- **Monitor position health**: The UI shows health percentage and liquidation price
+- **Add collateral**: You can top up your margin at any time
+- **Close early**: Close your position before health drops too low
+- **Watch funding**: Continuous funding erodes your collateral over time -- factor it into your holding period
+
+## Key Parameters
+
+| Parameter | Value | Mutable? |
+|-----------|-------|----------|
+| Maintenance margin | 5% of notional | Admin-configurable |
+| Liquidation bonus | 5% of remaining equity | Admin-configurable |
+| Insurance fee | 5% of LP fees | Immutable |
+| Max position utilization | 20% of pool (hard cap 50%) | Admin-configurable |
