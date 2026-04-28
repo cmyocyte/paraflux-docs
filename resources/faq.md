@@ -83,7 +83,7 @@ Walk-forward backtest across 14 markets on 365 days of real data: **+141.4% annu
 
 **Can I withdraw anytime?**
 
-Yes, after 1-hour cooldown following last deposit. Withdrawals processed instantly at current share price.
+Yes, after 1-hour cooldown following last deposit. Withdrawals process instantly at current share price. A utilization-based exit fee applies when the vault is heavily utilized — 0% when utilization is below 50%, ramping up to 3% max at full utilization. Most withdrawals pay zero exit fee. See [Fee Structure](../protocol/fees.md) for details.
 
 **Fee split breakdown:**
 

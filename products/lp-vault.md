@@ -12,7 +12,7 @@ The LP Vault is Paraflux's default product. Deposit USDC, earn yield from being 
    - Funding income from leveraged traders
    - Net trader losses (most leveraged traders lose over time)
 3. **Protocol hedges** delta exposure via CoreWriter on Hyperliquid's native order book
-4. **Withdraw** USDC anytime (1-hour cooldown after deposit)
+4. **Withdraw** USDC anytime (1-hour cooldown after deposit). A utilization-based exit fee applies when the vault is heavily utilized (0 bps below 50% utilization, up to 300 bps at full utilization).
 
 ## Performance (Backtest)
 

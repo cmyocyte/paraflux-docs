@@ -68,9 +68,22 @@ Funding rate adjusts based on OI skew. When longs dominate, rate increases. When
 
 The funding formula simplifies: `p*(p-1)/2 = 1`, so the baseVolatility parameter IS the underlying σ directly. No scaling factor needed.
 
+## Exit Fee (LP Vault Withdrawals)
+
+A utilization-based exit fee protects existing LPs when withdrawals would push the vault toward undercollateralization:
+
+| Vault Utilization After Withdrawal | Exit Fee |
+|------------------------------------|----------|
+| Below 50% | 0 bps (free) |
+| 50% – 80% | 0 → 50 bps (linear ramp) |
+| 80% – 100% | 50 → 300 bps (surge ramp) |
+
+The fee is zero for most withdrawals — it only kicks in when the vault is heavily utilized (open positions lock a large share of assets). This prevents bank-run dynamics where early withdrawers extract value at the expense of remaining LPs.
+
+Exit fees stay in the vault (increase share price for remaining LPs). No deposit fees.
+
 ## No Hidden Costs
 
-- No deposit fees
-- No withdrawal fees (1-hour cooldown only)
+- No off-chain fees or payment for order flow
 - No gas rebates or priority fee manipulation
 - All parameters visible on-chain and immutable (or admin-configurable within bounds)
