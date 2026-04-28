@@ -82,6 +82,8 @@ The fee is zero for most withdrawals — it only kicks in when the vault is heav
 
 Exit fees stay in the vault (increase share price for remaining LPs). No deposit fees.
 
+**At launch, the exit fee is disabled.** Admin will enable it via `setExitFeeEnabled(true)` once TVL is established. Until then, all withdrawals are free (1-hour cooldown only).
+
 ## No Hidden Costs
 
 - No off-chain fees or payment for order flow
