@@ -21,7 +21,7 @@
 | **HIP-3** | Hyperliquid Improvement Proposal 3: builder-deployed perpetuals. Source of GOLD, SILVER, OIL price feeds. |
 | **BBO Precompile** | 0x080e -- returns best bid/offer for any asset including HIP-3 markets. |
 | **Insurance Fund** | First-loss buffer absorbing bad debt. 5% of fees (immutable). |
-| **Maintenance Margin** | 5% of notional. Position liquidated if equity drops below this. |
+| **Maintenance Margin** | 15% of notional. Position liquidated if equity drops below this. |
 | **Liquidation Bonus** | 5% reward paid to liquidators from remaining collateral. |
 | **Impact Fee** | Quadratic fee that scales with trade size relative to pool depth. LP protection. |
 | **Kelly Criterion** | Optimal position sizing formula: `f = E[R] / Var[R]`. Half-Kelly used for safety. |

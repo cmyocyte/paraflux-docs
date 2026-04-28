@@ -5,26 +5,27 @@ Paraflux offers squared perpetual markets across crypto, commodities, and equiti
 ## Launch Roadmap
 
 ### Phase 1 -- Launch
-| Market | Asset | Power | Oracle | Status |
-|--------|-------|-------|--------|--------|
-| BTC^2 | Bitcoin | S^2 | Core perp (0x0807) | Launch |
-| ETH^2 | Ethereum | S^2 | Core perp (0x0807) | Launch |
+| Market | Asset | Power | Oracle |
+|--------|-------|-------|--------|
+| BTC^2 | Bitcoin | S^2 | Core perp (0x0807) |
+| ETH^2 | Ethereum | S^2 | Core perp (0x0807) |
 
 ### Phase 2 -- Multi-Asset
-| Market | Asset | Power | Oracle | Status |
-|--------|-------|-------|--------|--------|
-| HYPE^2 | Hyperliquid | S^2 | Core perp (0x0807) | Phase 2 |
-| GOLD^2 | Gold | S^2 | HIP-3 BBO (0x080e) | Phase 2 |
-| SILVER^2 | Silver | S^2 | HIP-3 BBO (0x080e) | Phase 2 |
+| Market | Asset | Power | Oracle |
+|--------|-------|-------|--------|
+| HYPE^2 | Hyperliquid | S^2 | Core perp (0x0807) |
+| SOL^2 | Solana | S^2 | Core perp (0x0807) |
+| GOLD^2 | Gold | S^2 | HIP-3 BBO (0x080e) |
+| SILVER^2 | Silver | S^2 | HIP-3 BBO (0x080e) |
 
 ### Phase 3 -- Expansion
-| Market | Asset | Power | Oracle | Status |
-|--------|-------|-------|--------|--------|
-| SOL^2 | Solana | S^2 | Core perp (0x0807) | Phase 3 |
-| XRP^2 | Ripple | S^2 | Core perp (0x0807) | Phase 3 |
-| OIL^2 | Crude Oil | S^2 | HIP-3 BBO (0x080e) | Phase 3 |
-| TSLA^2 | Tesla | S^2 | HIP-3 BBO (0x080e) | Phase 3 |
-| NVDA^2 | Nvidia | S^2 | HIP-3 BBO (0x080e) | Phase 3 |
+| Market | Asset | Power | Oracle |
+|--------|-------|-------|--------|
+| XYZ100^2 | Nasdaq | S^2 | HIP-3 BBO (0x080e) |
+| TSLA^2 | Tesla | S^2 | HIP-3 BBO (0x080e) |
+| EUR/USD^2 | Euro/Dollar | S^2 | HIP-3 BBO (0x080e) |
+
+Vol oracles are already deployed on mainnet for all 9 assets. Power perp markets roll out in phases.
 
 ## Oracle Infrastructure
 

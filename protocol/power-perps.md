@@ -66,7 +66,7 @@ This is the "price of convexity" — longs pay for their option-like exposure.
 - Collateral + net P&L returned in USDC
 
 ### Liquidation
-- Triggered when health drops below maintenance margin (5%)
+- Triggered when health drops below maintenance margin (15%)
 - Liquidator receives 5% bonus
 - Insurance fund absorbs bad debt
 - Remaining shortfall: LP vault absorbs

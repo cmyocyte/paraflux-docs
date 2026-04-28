@@ -23,7 +23,7 @@ We are honest about this distinction: our RealizedVolOracle computes what happen
 
 ## When to Expect It
 
-After the core 10-market power perp launch is stable and the Volmex BVIV integration is complete. Follow our socials for announcements.
+After the core power perp launch is stable across all 9 markets and the Volmex BVIV integration is complete. Follow our socials for announcements.
 
 ## Further Reading
 

@@ -14,34 +14,35 @@ Paraflux is a power perpetual protocol on HyperEVM. Trade squared exposure (S^2)
 
 - **Power Perpetuals** -- Squared exposure to any asset. No strikes, no expiry, no fragmentation. One instrument per market.
 - **LP Vault** -- Deposit USDC. Earn trading fees, funding income, and hedged market-making yield. ERC-4626.
-- **Realized Vol Oracle** -- On-chain realized variance. No Chainlink, no Pyth. Any protocol can consume it.
+- **Realized Vol Oracle** -- On-chain realized variance computed natively from HyperEVM precompiles. Any protocol can consume it.
 
 ## Markets
 
 ### Phase 1 -- Launch
 
-| Market | Asset | Class | Oracle | Status |
-|--------|-------|-------|--------|--------|
-| BTC^2 | Bitcoin | Crypto | Core perp (0x0807) | Launch |
-| ETH^2 | Ethereum | Crypto | Core perp (0x0807) | Launch |
+| Market | Asset | Class | Oracle |
+|--------|-------|-------|--------|
+| BTC^2 | Bitcoin | Crypto | Core perp (0x0807) |
+| ETH^2 | Ethereum | Crypto | Core perp (0x0807) |
 
 ### Phase 2 -- Multi-Asset
 
-| Market | Asset | Class | Oracle | Status |
-|--------|-------|-------|--------|--------|
-| HYPE^2 | Hyperliquid | Crypto | Core perp (0x0807) | Phase 2 |
-| GOLD^2 | Gold | Commodity | HIP-3 BBO (0x080e) | Phase 2 |
-| SILVER^2 | Silver | Commodity | HIP-3 BBO (0x080e) | Phase 2 |
+| Market | Asset | Class | Oracle |
+|--------|-------|-------|--------|
+| HYPE^2 | Hyperliquid | Crypto | Core perp (0x0807) |
+| SOL^2 | Solana | Crypto | Core perp (0x0807) |
+| GOLD^2 | Gold | Commodity | HIP-3 BBO (0x080e) |
+| SILVER^2 | Silver | Commodity | HIP-3 BBO (0x080e) |
 
 ### Phase 3 -- Expansion
 
-| Market | Asset | Class | Oracle | Status |
-|--------|-------|-------|--------|--------|
-| SOL^2 | Solana | Crypto | Core perp (0x0807) | Phase 3 |
-| XRP^2 | Ripple | Crypto | Core perp (0x0807) | Phase 3 |
-| OIL^2 | Crude Oil | Energy | HIP-3 BBO (0x080e) | Phase 3 |
-| TSLA^2 | Tesla | Equities | HIP-3 BBO (0x080e) | Phase 3 |
-| NVDA^2 | Nvidia | Equities | HIP-3 BBO (0x080e) | Phase 3 |
+| Market | Asset | Class | Oracle |
+|--------|-------|-------|--------|
+| XYZ100^2 | Nasdaq | Equities Index | HIP-3 BBO (0x080e) |
+| TSLA^2 | Tesla | Equities | HIP-3 BBO (0x080e) |
+| EUR/USD^2 | Euro/Dollar | Forex | HIP-3 BBO (0x080e) |
+
+Vol oracles are already deployed on mainnet for all 9 assets. Power perp markets roll out in phases.
 
 ## Quick Start
 
@@ -52,7 +53,7 @@ import { ParaFluxClient } from '@paraflux/sdk';
 
 const client = new ParaFluxClient({
   chainId: 998,  // testnet (999 for mainnet)
-  rpcUrl: 'https://rpc.hyperevm-testnet.xyz',
+  rpcUrl: 'https://rpc.hyperliquid-testnet.xyz/evm',
 });
 
 // Read volatility
@@ -67,7 +68,7 @@ for (const [asset, s] of surfaces) {
 ```typescript
 const client = new ParaFluxClient({
   chainId: 998,
-  rpcUrl: 'https://rpc.hyperevm-testnet.xyz',
+  rpcUrl: 'https://rpc.hyperliquid-testnet.xyz/evm',
   privateKey: '0x...',
 });
 

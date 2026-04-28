@@ -23,7 +23,7 @@ import { ParafluxClient } from "@paraflux/sdk";
 
 const client = new ParafluxClient({
   chain: 998, // testnet (999 for mainnet when live)
-  rpc: "https://rpc.hyperevm-testnet.xyz",
+  rpc: "https://rpc.hyperliquid-testnet.xyz/evm",
 });
 
 // Get market data
@@ -45,7 +45,7 @@ import { ParafluxClient } from "@paraflux/sdk";
 
 const client = new ParafluxClient({
   chain: 998,
-  rpc: "https://rpc.hyperevm-testnet.xyz",
+  rpc: "https://rpc.hyperliquid-testnet.xyz/evm",
   privateKey: process.env.PRIVATE_KEY,
 });
 
@@ -136,8 +136,8 @@ const kelly = volArb.kellySize({
 
 | Network | Chain ID | RPC |
 |---------|----------|-----|
-| Testnet | 998 | `https://rpc.hyperevm-testnet.xyz` |
-| Mainnet | 999 | `https://rpc.hyperevm.xyz` |
+| Testnet | 998 | `https://rpc.hyperliquid-testnet.xyz/evm` |
+| Mainnet | 999 | `https://rpc.hyperliquid.xyz/evm` |
 
 ## Further Reading
 

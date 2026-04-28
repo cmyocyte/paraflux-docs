@@ -31,19 +31,19 @@ Trader --> PowerPerpRouter --> PositionEngine (open/close)
 - No expiry -- hold as long as you want
 - Pay continuous funding (based on realized variance)
 - Close anytime at current oracle price
-- Liquidation at 5% maintenance margin
+- Liquidation at 15% maintenance margin
 
 ## For LPs
 
 - Deposit USDC into the vault, receive ERC-4626 shares
-- Earn trading fees (75% of all fees), funding income, and net trader losses
+- Earn trading fees (70% of all fees), funding income, and net trader losses
 - Delta risk is automatically hedged via CoreWriter on Hyperliquid's native perp order book
 - 1-hour withdrawal cooldown after deposit
-- Backtested performance: 68% annual return, Sharpe ratio 5.1 (365 days of real data, walk-forward validated)
+- Backtested performance: +141.4% annual return, Sharpe 12.08, -2.5% max drawdown (365 days of real Hyperliquid data across 14 markets, walk-forward validated)
 
 ## Markets
 
-Paraflux launches with BTC and ETH power perps, with HYPE, gold, and silver following shortly after. The roadmap includes SOL, XRP, and real-world assets (TSLA, NVDA, oil).
+Paraflux launches with BTC and ETH power perps, with HYPE, SOL, gold, and silver following shortly after. Phase 3 adds equities and forex (XYZ100/Nasdaq, TSLA, EUR/USD). Vol oracles are already deployed on mainnet for all 9 assets.
 
 All contracts are immutable and non-upgradeable. The protocol is currently live on HyperEVM testnet (chain 998) with mainnet deployment (chain 999) imminent.
 

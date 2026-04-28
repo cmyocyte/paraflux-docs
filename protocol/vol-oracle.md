@@ -4,11 +4,7 @@ The RealizedVolOracle computes **realized variance from spot price log returns**
 
 ## Why It Matters
 
-As of April 2026:
-- **Chainlink**: Zero volatility feeds
-- **Pyth**: Zero volatility feeds
-- **Every DeFi lending protocol**: Uses off-chain vol analysis pushed through monthly governance
-- **Paraflux**: Computes realized variance natively on-chain across 10 markets
+As of April 2026, no major oracle provider (Chainlink, Pyth) offers dedicated on-chain volatility feeds. Most DeFi lending protocols rely on off-chain vol analysis pushed through periodic governance votes. Paraflux computes realized variance natively on-chain across 9 markets — any smart contract can read it via a free `view` call.
 
 ## How It Works
 
@@ -73,7 +69,7 @@ console.log(`Realized vol (1d): ${(surface.realizedVol1d * 100).toFixed(1)}%`);
 console.log(`Vol-of-vol: ${(math.varianceToVol(surface.termStructure.volOfVol) * 100).toFixed(1)}%`);
 ```
 
-### Read all 10 markets at once
+### Read all 9 markets at once
 
 ```typescript
 const surfaces = await client.getAllVolSurfaces();

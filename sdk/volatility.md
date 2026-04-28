@@ -1,6 +1,6 @@
 # Volatility Data
 
-Paraflux provides on-chain realized variance data across 10 markets -- crypto, commodities, and energy.
+Paraflux provides on-chain realized variance data across 9 markets -- crypto, commodities, equities, and forex.
 
 > **Important:** This is realized variance (what actually happened), not implied volatility (what the market expects). See [Realized Vol Oracle](../protocol/vol-oracle.md) for the full explanation.
 
@@ -9,7 +9,7 @@ Paraflux provides on-chain realized variance data across 10 markets -- crypto, c
 | Method | Returns | Description |
 |--------|---------|-------------|
 | `getVolSurface(asset)` | `VolSurface` | Complete vol snapshot: term structure, vol-of-vol, realized vol |
-| `getAllVolSurfaces()` | `Map<VolAsset, VolSurface>` | All 10 markets in parallel |
+| `getAllVolSurfaces()` | `Map<VolAsset, VolSurface>` | All 9 markets in parallel |
 | `getCurrentVariance(asset)` | `bigint` | 1-day windowed variance (WAD) |
 | `getRealizedVol(asset)` | `number` | Annualized vol as float |
 | `getVolOfVol(asset)` | `bigint` | Regime detection metric (WAD) |
@@ -22,7 +22,7 @@ Paraflux provides on-chain realized variance data across 10 markets -- crypto, c
 ## Available Assets
 
 ```typescript
-type VolAsset = 'BTC' | 'ETH' | 'SOL' | 'HYPE' | 'XRP' | 'SUI' | 'DOGE' | 'GOLD' | 'SILVER' | 'OIL';
+type VolAsset = 'BTC' | 'ETH' | 'SOL' | 'HYPE' | 'XYZ100' | 'TSLA' | 'GOLD' | 'SILVER' | 'EURUSD';
 ```
 
 ## The VolSurface Object

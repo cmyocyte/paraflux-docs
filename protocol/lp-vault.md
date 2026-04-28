@@ -2,7 +2,7 @@
 
 > This page covers how the LP Vault works under the hood. For how to deposit and earn yield, see [LP Vault (Earn Yield)](../products/lp-vault.md).
 
-The LP Vault is an ERC-4626 vault that serves as the counterparty to **all power perpetual traders** across 10 markets. The vault earns trading fees, funding income, and net trader losses. Delta exposure is hedged via CoreWriter.
+The LP Vault is an ERC-4626 vault that serves as the counterparty to **all power perpetual traders** across 9 markets. The vault earns trading fees, funding income, and net trader losses. Delta exposure is hedged via CoreWriter.
 
 ## Architecture
 

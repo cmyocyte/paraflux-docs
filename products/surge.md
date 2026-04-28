@@ -18,7 +18,7 @@ Surge = 50% LP Vault + 50% leveraged long. Directional exposure with a yield buf
 | Sharpe | 1.60 | 1.59 | 3.25 |
 | Max DD | -75.9% | -64.2% | -7.1% |
 
-Surge **beats buy-and-hold** because the LP Vault income buffer adds yield on top of the leveraged exposure.
+In backtesting, Surge **outperformed buy-and-hold** because the LP Vault income buffer adds yield on top of the leveraged exposure. Past backtested performance does not guarantee future results.
 
 ## Who It's For
 

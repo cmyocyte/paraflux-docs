@@ -13,8 +13,8 @@ The insurance fund is a first-loss buffer that absorbs bad debt before LPs are a
 
 ```
 Trader pays fee
-  → 75% to LP Vault
-  → 20% to Protocol Treasury
+  → 70% to LP Vault
+  → 25% to Protocol Treasury
   → 5% to Insurance Fund (immutable)
 ```
 
@@ -30,7 +30,7 @@ Liquidation with negative equity
 
 - `insuranceFeeBps` is set at deploy and **has no setter** — cannot be changed post-deploy
 - Target size is configurable by admin
-- When `isFull()`, insurance fee redirects to LPs (80% total)
+- When `isFull()`, insurance fee redirects to LPs (75% total)
 - USDC flow: Router → vault.transferOut(insuranceFund, amt); Fund → usdc.safeTransfer(vault, amt)
 
 ## SDK

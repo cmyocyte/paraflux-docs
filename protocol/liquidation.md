@@ -12,16 +12,16 @@ equity < maintenanceMargin x notional
 
 Where:
 - **equity** = collateral + unrealized P&L - accrued funding
-- **maintenanceMargin** = 5% of notional
+- **maintenanceMargin** = 15% of notional
 - **notional** = position size x current index
 
 ### Example
 
 You open a 2x long on HYPE at $45 with $500 collateral ($1,000 notional):
-- Maintenance margin = 5% x $1,000 = $50
-- You get liquidated when equity drops to $50
-- That's a loss of $450 on $500 collateral (90% loss)
-- At 2x leverage, this happens after roughly a ~22% adverse spot move (accounting for the squared payoff)
+- Maintenance margin = 15% x $1,000 = $150
+- You get liquidated when equity drops to $150
+- That's a loss of $350 on $500 collateral (70% loss)
+- At 2x leverage, this happens after roughly a ~18% adverse spot move (accounting for the squared payoff)
 
 ## Liquidation Price
 
@@ -29,11 +29,11 @@ For power perps (p=2), the liquidation price depends on leverage and the squared
 
 | Leverage | Approx. Adverse Move to Liq (Long) |
 |----------|-------------------------------------|
-| 1x | ~68% drop |
-| 1.5x | ~50% drop |
-| 2x | ~38% drop |
-| 2.5x | ~31% drop |
-| 3x | ~27% drop |
+| 1x | ~54% drop |
+| 1.5x | ~38% drop |
+| 2x | ~28% drop |
+| 2.5x | ~23% drop |
+| 3x | ~19% drop |
 
 These are approximate -- actual liquidation depends on accumulated funding and the squared index dynamics.
 
@@ -85,7 +85,7 @@ Liquidations are executed by third-party keepers, not by Paraflux. Anyone can ru
 
 | Parameter | Value | Mutable? |
 |-----------|-------|----------|
-| Maintenance margin | 5% of notional | Admin-configurable |
+| Maintenance margin | 15% of notional | Admin-configurable |
 | Liquidation bonus | 5% of remaining equity | Admin-configurable |
 | Insurance fee | 5% of LP fees | Immutable |
 | Max position utilization | 20% of pool (hard cap 50%) | Admin-configurable |

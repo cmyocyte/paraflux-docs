@@ -40,5 +40,5 @@
 
 ## Roadmap
 
-* [Vol Index Trading](products/vix-token.md)
+* [Vol Index Trading](products/vol-index.md)
 * [Variance Swaps](protocol/variance-swaps.md)

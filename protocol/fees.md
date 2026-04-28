@@ -1,76 +1,76 @@
 # Fee Structure
 
-All fees are charged on-chain by Paraflux smart contracts at the time of trade execution. There are no off-chain fees, no payments for order flow, and no hidden costs.
+All fees are charged on-chain by Paraflux contracts at trade execution. No off-chain fees, no payment for order flow, no hidden costs.
 
 ## Trading Fees
 
-Every trade pays a fee composed of two parts:
-
 ```
-effectiveFee = tradingFee + impactCoefficient x notional / totalAssets
+effectiveFee = tradingFee + impactCoefficient × notional / totalAssets
 ```
 
 | Component | Default Value | Description |
 |-----------|--------------|-------------|
-| Trading Fee | 0.30% (30 bps) | Fixed percentage of notional |
-| Impact Coefficient | 0.3 (30%) | Scales quadratically with trade size relative to pool |
-| Protocol Split | 20% of total fees | Directed to protocol treasury |
-| Insurance Split | 5% of LP fees | First-loss buffer (immutable, set at deploy) |
+| Router base fee | 0.15% (15 bps) | Fixed percentage on all Router trades |
+| Compiled strategy fee | 0.12% (12 bps) | Flat fee via CompilerExecutor (discount vs Router) |
+| Impact coefficient | 0.3 (30%) | Scales quadratically with position size |
 
-### Impact Fee
+### Compiled Strategy Discount
 
-The impact fee protects LPs from concentrated informed flow. It's quadratic in position size:
+Multi-leg strategies executed via **CompilerExecutor** pay a flat 12 bps on total strategy notional instead of the Router's 15 bps per leg. Manual decomposition of a 3-leg strategy would cost ~45 bps effective (3 x 15 bps); the compiled path costs just 12 bps — a 73% discount. This incentivizes traders to use the compiler for complex payoffs.
 
-- A $1,000 trade into a $500K pool pays ~0.06% impact (negligible)
-- A $50,000 trade into a $500K pool pays ~3% impact (significant)
-- A $100,000 trade into a $500K pool pays ~6% impact (very expensive)
+## Impact Fee
 
-This ensures large trades pay proportionally more, reflecting their outsized impact on the vault.
+Protects LPs from concentrated informed flow. Quadratic in position size relative to pool depth:
 
-### Fee Split
+- $1,000 trade into $500K pool: ~0.06% impact (negligible)
+- $50,000 trade into $500K pool: ~3% impact (significant)
+- $100,000 trade into $500K pool: ~6% impact (very expensive)
+
+Large trades pay proportionally more. This is the LP's primary defense against informed flow.
+
+## Fee Split
 
 ```
 Total Fee
-  |-- 20% --> Protocol Treasury
-  |-- 80% --> LP Pool
-        |-- 95% --> LPs
-        |-- 5%  --> Insurance Fund (immutable)
+  ├── 70% → LP Vault (immediate income)
+  ├── 25% → Protocol Treasury
+  └── 5%  → Insurance Fund (immutable — cannot be changed post-deploy)
 ```
 
-When the insurance fund reaches its target size, its 5% slice redirects back to LPs.
+When the insurance fund reaches its target size, the 5% slice redirects back to LPs (75% total).
 
 ## Funding
 
-Funding is continuous -- it accrues every second, on-chain. Longs pay shorts.
+Continuous funding accrues every second on-chain. Longs pay shorts.
 
 ### Base Rate
 
 ```
-dailyFunding = sigma^2 / 365 x notional
+dailyFunding = σ² / 365 × notional
 ```
 
-Where sigma^2 is the realized variance from the on-chain RealizedVolOracle. When the ImpliedVolOracle is set, it uses live implied variance instead.
+Where σ² is realized variance from the RealizedVolOracle.
 
 ### Examples at Different Vol Levels
 
-| Asset Vol | Daily Funding (per $1,000 notional) | Annual Rate |
-|-----------|-------------------------------------|-------------|
-| 30% | $0.25/day | 9.0% |
-| 50% | $0.68/day | 25.0% |
-| 80% | $1.75/day | 64.0% |
-| 100% | $2.74/day | 100.0% |
+| Asset Vol | Daily per $10K notional | Annual Rate |
+|-----------|------------------------|-------------|
+| 30% | $2.47/day | 9.0% |
+| 50% | $6.85/day | 25.0% |
+| 80% | $17.53/day | 64.0% |
+| 100% | $27.40/day | 100.0% |
 
 ### Skew Adjustment
 
-Funding rate adjusts based on OI skew (long OI vs short OI). When longs dominate, the rate increases. When shorts dominate, it decreases. This incentivizes balance.
+Funding rate adjusts based on OI skew. When longs dominate, rate increases. When shorts dominate, rate decreases. This incentivizes balance.
 
 ### For Power = 2
 
-Because p=2, the funding formula simplifies: `p*(p-1)/2 = 1`, so the base volatility parameter IS the underlying sigma directly. No sqrt(2) scaling needed.
+The funding formula simplifies: `p*(p-1)/2 = 1`, so the baseVolatility parameter IS the underlying σ directly. No scaling factor needed.
 
 ## No Hidden Costs
 
 - No deposit fees
 - No withdrawal fees (1-hour cooldown only)
 - No gas rebates or priority fee manipulation
-- All fee parameters are visible on-chain and immutable (or admin-configurable within defined bounds)
+- All parameters visible on-chain and immutable (or admin-configurable within bounds)

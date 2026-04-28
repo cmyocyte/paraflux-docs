@@ -36,7 +36,7 @@ Anchor is a **ranging/crash product**, not a bull product. For bull exposure, us
 - **Gamma drag**: Large daily moves (>3%) cost more than funding earns
 - **Hedge cost**: CoreWriter execution slippage on rebalancing
 - **Linear perp funding**: The long hedge position pays linear perp funding
-- **Single-asset risk**: Concentrated in one asset's vol (LP Vault diversifies across 10 markets)
+- **Single-asset risk**: Concentrated in one asset's vol (LP Vault diversifies across 9 markets)
 
 ## Multi-Asset Opportunity
 
